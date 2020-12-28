@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -31,6 +30,8 @@ func main() {
 		panic(err)
 	}
 
+	DB.AutoMigrate(&Todo{})
+
 	r := gin.Default()
 
 	// 配置模板及静态资源目录
@@ -43,11 +44,22 @@ func main() {
 
 	V1Group := r.Group("/v1")
 	{
+		// 获取
 		V1Group.GET("/todo", func(c *gin.Context) {
 			var todo []Todo
 			DB.Find(&todo)
 			c.JSON(http.StatusOK, todo)
 		})
+		// 添加
+		V1Group.POST("/todo", func(c *gin.Context) {
+			var todo Todo
+			c.BindJSON(&todo)
+			DB.Select("title").Create(&todo)
+			c.JSON(http.StatusOK, gin.H{
+				"msg" : "成功",
+			})
+		})
+
 		
 
 	}
