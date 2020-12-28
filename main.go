@@ -68,7 +68,6 @@ func main() {
 			var todo Todo
 			DB.Where("id = ?", id).First(&todo)
 
-			c.BindJSON(&todo)
 			DB.Save(&todo)
 			c.JSON(http.StatusOK, gin.H{
 				"code" : 0,
