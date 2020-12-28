@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -14,7 +15,7 @@ var (
 type Todo struct {
 	ID int `json:"id"`
 	Title string `json:"title"`
-	Status int `json:"status"`
+	Status bool `json:"status"`
 }
 
 func initMysql() (err error) {
@@ -56,10 +57,33 @@ func main() {
 			c.BindJSON(&todo)
 			DB.Select("title").Create(&todo)
 			c.JSON(http.StatusOK, gin.H{
-				"msg" : "成功",
+				"code" : 0,
+				"msg"  : "成功",
+				"data" : todo,
 			})
 		})
+		// 更新
+		V1Group.PUT("/todo/:id", func(c *gin.Context) {
+			id, _ := c.Params.Get("id")
+			fmt.Println(id)
+			var todo Todo
+			DB.Where("id = ?", id).First(&todo)
 
+			c.BindJSON(&todo)
+
+			if err := DB.Save(&todo); err != nil {
+				c.JSON(http.StatusOK, gin.H{
+					"code" : 1,
+					"msg"  : "error",
+				})
+			} else {
+				c.JSON(http.StatusOK, gin.H{
+					"code" : 0,
+					"msg"  : "成功",
+				})
+			}
+
+		})
 		
 
 	}
