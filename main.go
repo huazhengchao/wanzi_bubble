@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -65,24 +64,27 @@ func main() {
 		// 更新
 		V1Group.PUT("/todo/:id", func(c *gin.Context) {
 			id, _ := c.Params.Get("id")
-			fmt.Println(id)
+
 			var todo Todo
 			DB.Where("id = ?", id).First(&todo)
 
 			c.BindJSON(&todo)
+			DB.Save(&todo)
+			c.JSON(http.StatusOK, gin.H{
+				"code" : 0,
+				"msg"  : "成功",
+			})
+		})
+		// 删除
+		V1Group.DELETE("/todo/:id", func(c *gin.Context) {
+			id, _ := c.Params.Get("id")
+			var todo Todo
+			DB.Where("id = ?", id).Delete(&todo)
 
-			if err := DB.Save(&todo); err != nil {
-				c.JSON(http.StatusOK, gin.H{
-					"code" : 1,
-					"msg"  : "error",
-				})
-			} else {
-				c.JSON(http.StatusOK, gin.H{
-					"code" : 0,
-					"msg"  : "成功",
-				})
-			}
-
+			c.JSON(http.StatusOK, gin.H{
+				"code" : 0,
+				"msg"  : "成功",
+			})
 		})
 		
 
